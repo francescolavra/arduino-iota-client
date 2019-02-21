@@ -1,0 +1,4 @@
+[submodule "iota-c-library"]
+	path = src/iota-c-library
+	url = https://github.com/francescolavra/iota-c-library.git
+	branch = master
