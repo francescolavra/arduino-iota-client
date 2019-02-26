@@ -380,9 +380,11 @@ int IotaWallet::sendTransfer(uint64_t value, String recipient, String tag,
 		DPRINTF("%s: couldn't store transactions\n", __FUNCTION__);
 		return IOTA_ERR_NETWORK;
 	}
-	_firstUnspentAddr = -1;
-	if (inputAddrIdx == NULL) {
-		_lastSpentAddr = inputAddrs[inputAddrs.size() - 1].addrIdx;
+	if (value != 0) {
+		_firstUnspentAddr = -1;
+		if (inputAddrIdx == NULL) {
+			_lastSpentAddr = inputAddrs[inputAddrs.size() - 1].addrIdx;
+		}
 	}
 	return (_iotaClient.broadcastTransactions(txsWithPoW) ? IOTA_OK :
 			IOTA_ERR_NETWORK);
