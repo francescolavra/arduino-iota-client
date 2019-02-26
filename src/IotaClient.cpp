@@ -23,8 +23,6 @@
  * SOFTWARE.
  */
 
-#include <time.h>
-
 #include "IotaClient.h"
 
 #ifdef __cplusplus

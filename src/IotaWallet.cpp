@@ -23,6 +23,8 @@
  * SOFTWARE.
  */
 
+#include <time.h>
+
 #include "IotaWallet.h"
 
 #ifdef __cplusplus
