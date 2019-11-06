@@ -59,7 +59,7 @@ bool IotaClient::getNodeInfo(struct iotaNodeInfo *info) {
 	}
 	jsonBuf.clear();
 
-	JsonObject& jsonResp = jsonBuf.parseObject(_client.responseBody());
+	JsonObject& jsonResp = getRespObj(jsonBuf);
 	if (jsonResp["appName"].is<char *>()) {
 		info->appName = jsonResp["appName"].as<String>();
 	}
@@ -136,7 +136,7 @@ bool IotaClient::getBalances(std::vector<String> &addrs,
 	respStatus = sendRequest(jsonReq);
 	jsonBuf.clear();
 	if (respStatus == 200) {
-		JsonObject& jsonResp = jsonBuf.parseObject(_client.responseBody());
+		JsonObject& jsonResp = getRespObj(jsonBuf);
 
 		if (jsonResp["balances"].is<JsonArray>()) {
 			balances.clear();
@@ -193,7 +193,7 @@ bool IotaClient::findTransactions(std::vector<String> &txs,
 	}
 	jsonBuf.clear();
 	txs.clear();
-	JsonObject& jsonResp = jsonBuf.parseObject(_client.responseBody());
+	JsonObject& jsonResp = getRespObj(jsonBuf);
 	if (jsonResp["hashes"].is<JsonArray>()) {
 		JsonArray &hashArray = jsonResp["hashes"].as<JsonArray&>();
 		for (int i = 0; i < hashArray.size(); i++) {
@@ -218,7 +218,7 @@ bool IotaClient::getTransaction(String &hash, struct IotaTx *tx) {
 		return false;
 	}
 	jsonBuf.clear();
-	JsonObject& jsonResp = jsonBuf.parseObject(_client.responseBody());
+	JsonObject& jsonResp = getRespObj(jsonBuf);
 	if (!jsonResp["trytes"].is<JsonArray>()) {
 		return false;
 	}
@@ -261,7 +261,7 @@ bool IotaClient::getTransactionsToApprove(int depth, String &trunk,
 		return false;
 	}
 	jsonBuf.clear();
-	JsonObject& jsonResp = jsonBuf.parseObject(_client.responseBody());
+	JsonObject& jsonResp = getRespObj(jsonBuf);
 	if (!jsonResp["trunkTransaction"].is<char *>() ||
 			!jsonResp["branchTransaction"].is<char *>()) {
 		return false;
@@ -292,7 +292,7 @@ bool IotaClient::attachToTangle(String &trunk, String &branch, int mwm,
 		return false;
 	}
 	jsonBuf.clear();
-	JsonObject& jsonResp = jsonBuf.parseObject(_client.responseBody());
+	JsonObject& jsonResp = getRespObj(jsonBuf);
 	if (!jsonResp["trytes"].is<JsonArray>()) {
 		return false;
 	}
@@ -348,7 +348,7 @@ bool IotaClient::wereAddressesSpentFrom(std::vector<String> &addrs,
 	respStatus = sendRequest(jsonReq);
 	jsonBuf.clear();
 	if (respStatus == 200) {
-		JsonObject& jsonResp = jsonBuf.parseObject(_client.responseBody());
+		JsonObject& jsonResp = getRespObj(jsonBuf);
 
 		if (jsonResp["states"].is<JsonArray>()) {
 			spent.clear();
@@ -372,4 +372,8 @@ int IotaClient::sendRequest(JsonObject &jsonReq) {
 	jsonReq.printTo(_client);
 	_client.endRequest();
 	return _client.responseStatusCode();
+}
+
+JsonObject &IotaClient::getRespObj(DynamicJsonBuffer &jsonBuf) {
+	return jsonBuf.parseObject(_client.responseBody());
 }

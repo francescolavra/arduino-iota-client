@@ -177,6 +177,7 @@ public:
 
 private:
 	int sendRequest(JsonObject &jsonReq);
+	JsonObject &getRespObj(DynamicJsonBuffer &jsonBuf);
 	HttpClient _client;
 };
 
