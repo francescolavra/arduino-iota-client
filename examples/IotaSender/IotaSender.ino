@@ -24,7 +24,11 @@
  */
 
 #include <IotaWallet.h>
+#ifdef ESP8266
+#include <ESP8266WiFi.h>
+#else
 #include <WiFi.h>
+#endif
 
 WiFiClient wifiClient;
 IotaClient iotaClient(wifiClient, "116.202.20.134", 14265);

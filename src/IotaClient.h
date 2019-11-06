@@ -27,7 +27,11 @@
 #define _IOTA_CLIENT_H_
 
 #include <Arduino.h>
+#ifdef ESP8266
+#include <ESP8266HTTPClient.h>
+#else
 #include <ArduinoHttpClient.h>
+#endif
 
 #define ARDUINOJSON_USE_LONG_LONG	1
 #include <ArduinoJson.h>
@@ -178,7 +182,14 @@ public:
 private:
 	int sendRequest(JsonObject &jsonReq);
 	JsonObject &getRespObj(DynamicJsonBuffer &jsonBuf);
+#ifdef ESP8266
+	class JsonHttpClient : public HTTPClient {
+	public:
+		int sendRequest(JsonObject &jsonReq);
+	} _client;
+#else
 	HttpClient _client;
+#endif
 };
 
 #endif

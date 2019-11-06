@@ -42,9 +42,16 @@ extern "C"
 #define DPRINTF(fmt, ...)	do {} while(0)
 #endif
 
+#ifdef ESP8266
+IotaClient::IotaClient(Client &networkClient, const char *host, int port) {
+	_client.begin(static_cast<WiFiClient&>(networkClient), host, port);
+	_client.setTimeout(16 * 1024);
+}
+#else
 IotaClient::IotaClient(Client &networkClient, const char *host, int port)
 : _client(networkClient, host, port) {
 }
+#endif
 
 bool IotaClient::getNodeInfo(struct iotaNodeInfo *info) {
 	DynamicJsonBuffer jsonBuf;
@@ -363,6 +370,9 @@ bool IotaClient::wereAddressesSpentFrom(std::vector<String> &addrs,
 }
 
 int IotaClient::sendRequest(JsonObject &jsonReq) {
+#ifdef ESP8266
+	return _client.sendRequest(jsonReq);
+#else
 	_client.beginRequest();
 	_client.post("/");
 	_client.sendHeader("Content-Type", "application/json");
@@ -372,8 +382,64 @@ int IotaClient::sendRequest(JsonObject &jsonReq) {
 	jsonReq.printTo(_client);
 	_client.endRequest();
 	return _client.responseStatusCode();
+#endif
 }
 
 JsonObject &IotaClient::getRespObj(DynamicJsonBuffer &jsonBuf) {
+#ifdef ESP8266
+	return jsonBuf.parseObject(_client.getStream());
+#else
 	return jsonBuf.parseObject(_client.responseBody());
+#endif
 }
+
+#ifdef ESP8266
+
+int IotaClient::JsonHttpClient::sendRequest(JsonObject &jsonReq) {
+	disconnect(true);	/* Clean up previous connection, if any. */
+	addHeader("Content-Type", "application/json");
+	addHeader("X-IOTA-API-Version", "1");
+	addHeader("Content-Length", String(jsonReq.measureLength()));
+	if (!connect()) {
+		return returnError(HTTPC_ERROR_CONNECTION_REFUSED);
+	}
+	if (!sendHeader("POST")) {
+		return returnError(HTTPC_ERROR_SEND_HEADER_FAILED);
+	}
+
+	class BufferedWiFiPrint : public Print {
+	public:
+		BufferedWiFiPrint(size_t bufSize, WiFiClient &wifi) : _bufSize(bufSize),
+		_wifi(wifi) {
+			_buf = (uint8_t *) malloc(bufSize);
+			_byteCount = 0;
+		}
+		~BufferedWiFiPrint() {
+			free(_buf);
+		}
+		size_t write(uint8_t b) {
+			_buf[_byteCount++] = b;
+			if (_byteCount == _bufSize) {
+				_wifi.write(_buf, _byteCount);
+				_byteCount = 0;
+			}
+			return 1;
+		}
+		void flush() {
+			if (_byteCount != 0) {
+				_wifi.write(_buf, _byteCount);
+				_byteCount = 0;
+			}
+		}
+	private:
+		size_t _bufSize, _byteCount;
+		uint8_t *_buf;
+		WiFiClient &_wifi;
+	} print(HTTP_TCP_BUFFER_SIZE, getStream());
+	jsonReq.printTo(print);
+	print.flush();
+
+	return returnError(handleHeaderResponse());
+}
+
+#endif

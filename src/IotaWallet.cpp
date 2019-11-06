@@ -77,6 +77,7 @@ static int iotaWalletTxReceiver(iota_wallet_tx_object_t *tx_object)
 		iota_wallet_construct_raw_transaction_chars(iotaWalletTxPtr,
 				iotaWalletBundleHashPtr, tx_object);
 		iotaWalletTxPtr += NUM_TRANSACTION_TRYTES;
+		yield();
 		return 1;
 	}
 	else {
@@ -403,6 +404,7 @@ String IotaWallet::getAddress(unsigned int index, bool withChecksum) {
 	unsigned char addrBytes[NUM_HASH_BYTES];
 
 	get_public_addr(_seedBytes, index, _security, addrBytes);
+	yield();
 	if (withChecksum) {
 		char fullAddr[NUM_HASH_TRYTES + NUM_ADDR_CKSUM_TRYTES + 1];
 
@@ -502,6 +504,7 @@ bool IotaWallet::findAddresses(std::vector<String> &addrs) {
 		bool addrFound;
 
 		get_public_addr(_seedBytes, addrIndex, _security, addrBytes);
+		yield();
 		bytes_to_chars(addrBytes, addrChars, NUM_HASH_BYTES);
 		if (!findAddress(addrChars, &addrFound)) {
 			return false;

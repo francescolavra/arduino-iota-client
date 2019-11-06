@@ -2,7 +2,9 @@
 
 This is a IOTA library for Arduino; it can be used to connect to a user-supplied IOTA node that exports the HTTP IRI API, and can do things such as getting the current balance and transferring IOTAs.
 
-Tested with ESP32 Arduino core.
+Supported platforms:
+* ESP32
+* ESP8266
 
 ## Dependencies
 
