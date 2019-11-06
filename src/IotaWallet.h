@@ -274,7 +274,7 @@ private:
 	unsigned char _seedBytes[48];
 	unsigned int _security;
 	unsigned int _mwm;
-	IotaClient _iotaClient;
+	IotaClient &_iotaClient;
 	PoWClient *_PoWClient;
 	int _firstUnspentAddr, _lastSpentAddr;
 };
