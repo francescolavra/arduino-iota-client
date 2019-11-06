@@ -47,8 +47,8 @@ IotaClient::IotaClient(Client &networkClient, const char *host, int port)
 }
 
 bool IotaClient::getNodeInfo(struct iotaNodeInfo *info) {
-	DynamicJsonBuffer jsonReqBuf;
-	JsonObject &jsonReq = jsonReqBuf.createObject();
+	DynamicJsonBuffer jsonBuf;
+	JsonObject &jsonReq = jsonBuf.createObject();
 	int respStatus;
 
 	jsonReq["command"] = "getNodeInfo";
@@ -57,9 +57,9 @@ bool IotaClient::getNodeInfo(struct iotaNodeInfo *info) {
 		DPRINTF("%s: response status code %d\n", __FUNCTION__, respStatus);
 		return false;
 	}
+	jsonBuf.clear();
 
-	DynamicJsonBuffer jsonRespBuf;
-	JsonObject& jsonResp = jsonRespBuf.parseObject(_client.responseBody());
+	JsonObject& jsonResp = jsonBuf.parseObject(_client.responseBody());
 	if (jsonResp["appName"].is<char *>()) {
 		info->appName = jsonResp["appName"].as<String>();
 	}
@@ -122,21 +122,21 @@ bool IotaClient::getNodeInfo(struct iotaNodeInfo *info) {
 
 bool IotaClient::getBalances(std::vector<String> addrs,
 		std::vector<uint64_t> &balances) {
-	DynamicJsonBuffer jsonReqBuf;
-	JsonObject &jsonReq = jsonReqBuf.createObject();
+	DynamicJsonBuffer jsonBuf;
+	JsonObject &jsonReq = jsonBuf.createObject();
 	int respStatus;
 
 	jsonReq["command"] = "getBalances";
-	JsonArray& addrArray = jsonReqBuf.createArray();
+	JsonArray& addrArray = jsonBuf.createArray();
 	for (auto it = addrs.cbegin(); it != addrs.cend(); it++) {
 		addrArray.add(*it);
 	}
 	jsonReq["addresses"] = addrArray;
 	jsonReq["threshold"] = 100;
 	respStatus = sendRequest(jsonReq);
+	jsonBuf.clear();
 	if (respStatus == 200) {
-		DynamicJsonBuffer jsonRespBuf;
-		JsonObject& jsonResp = jsonRespBuf.parseObject(_client.responseBody());
+		JsonObject& jsonResp = jsonBuf.parseObject(_client.responseBody());
 
 		if (jsonResp["balances"].is<JsonArray>()) {
 			balances.clear();
@@ -153,34 +153,34 @@ bool IotaClient::getBalances(std::vector<String> addrs,
 bool IotaClient::findTransactions(std::vector<String> &txs,
 		std::vector<String> bundles, std::vector<String> addrs,
 		std::vector<String> tags, std::vector<String> approvees) {
-	DynamicJsonBuffer jsonReqBuf;
-	JsonObject &jsonReq = jsonReqBuf.createObject();
+	DynamicJsonBuffer jsonBuf;
+	JsonObject &jsonReq = jsonBuf.createObject();
 	int respStatus;
 
 	jsonReq["command"] = "findTransactions";
 	if (bundles.size() != 0) {
-		JsonArray& bundleArray = jsonReqBuf.createArray();
+		JsonArray& bundleArray = jsonBuf.createArray();
 		for (auto it = bundles.cbegin(); it != bundles.cend(); it++) {
 			bundleArray.add(*it);
 		}
 		jsonReq["bundles"] = bundleArray;
 	}
 	if (addrs.size() != 0) {
-		JsonArray& addrArray = jsonReqBuf.createArray();
+		JsonArray& addrArray = jsonBuf.createArray();
 		for (auto it = addrs.cbegin(); it != addrs.cend(); it++) {
 			addrArray.add(*it);
 		}
 		jsonReq["addresses"] = addrArray;
 	}
 	if (tags.size() != 0) {
-		JsonArray& tagArray = jsonReqBuf.createArray();
+		JsonArray& tagArray = jsonBuf.createArray();
 		for (auto it = tags.cbegin(); it != tags.cend(); it++) {
 			tagArray.add(*it);
 		}
 		jsonReq["tags"] = tagArray;
 	}
 	if (approvees.size() != 0) {
-		JsonArray& approveeArray = jsonReqBuf.createArray();
+		JsonArray& approveeArray = jsonBuf.createArray();
 		for (auto it = approvees.cbegin(); it != approvees.cend(); it++) {
 			approveeArray.add(*it);
 		}
@@ -191,9 +191,9 @@ bool IotaClient::findTransactions(std::vector<String> &txs,
 		DPRINTF("%s: response status code %d\n", __FUNCTION__, respStatus);
 		return false;
 	}
+	jsonBuf.clear();
 	txs.clear();
-	DynamicJsonBuffer jsonRespBuf;
-	JsonObject& jsonResp = jsonRespBuf.parseObject(_client.responseBody());
+	JsonObject& jsonResp = jsonBuf.parseObject(_client.responseBody());
 	if (jsonResp["hashes"].is<JsonArray>()) {
 		JsonArray &hashArray = jsonResp["hashes"].as<JsonArray&>();
 		for (int i = 0; i < hashArray.size(); i++) {
@@ -204,9 +204,9 @@ bool IotaClient::findTransactions(std::vector<String> &txs,
 }
 
 bool IotaClient::getTransaction(String hash, struct IotaTx *tx) {
-	DynamicJsonBuffer jsonReqBuf;
-	JsonObject &jsonReq = jsonReqBuf.createObject();
-	JsonArray& hashArray = jsonReqBuf.createArray();
+	DynamicJsonBuffer jsonBuf;
+	JsonObject &jsonReq = jsonBuf.createObject();
+	JsonArray& hashArray = jsonBuf.createArray();
 	int respStatus;
 
 	jsonReq["command"] = "getTrytes";
@@ -217,8 +217,8 @@ bool IotaClient::getTransaction(String hash, struct IotaTx *tx) {
 		DPRINTF("%s: response status code %d\n", __FUNCTION__, respStatus);
 		return false;
 	}
-	DynamicJsonBuffer jsonRespBuf;
-	JsonObject& jsonResp = jsonRespBuf.parseObject(_client.responseBody());
+	jsonBuf.clear();
+	JsonObject& jsonResp = jsonBuf.parseObject(_client.responseBody());
 	if (!jsonResp["trytes"].is<JsonArray>()) {
 		return false;
 	}
@@ -249,8 +249,8 @@ bool IotaClient::getTransaction(String hash, struct IotaTx *tx) {
 
 bool IotaClient::getTransactionsToApprove(int depth, String &trunk,
 		String &branch) {
-	DynamicJsonBuffer jsonReqBuf;
-	JsonObject &jsonReq = jsonReqBuf.createObject();
+	DynamicJsonBuffer jsonBuf;
+	JsonObject &jsonReq = jsonBuf.createObject();
 	int respStatus;
 
 	jsonReq["command"] = "getTransactionsToApprove";
@@ -260,8 +260,8 @@ bool IotaClient::getTransactionsToApprove(int depth, String &trunk,
 		DPRINTF("%s: response status code %d\n", __FUNCTION__, respStatus);
 		return false;
 	}
-	DynamicJsonBuffer jsonRespBuf;
-	JsonObject& jsonResp = jsonRespBuf.parseObject(_client.responseBody());
+	jsonBuf.clear();
+	JsonObject& jsonResp = jsonBuf.parseObject(_client.responseBody());
 	if (!jsonResp["trunkTransaction"].is<char *>() ||
 			!jsonResp["branchTransaction"].is<char *>()) {
 		return false;
@@ -273,9 +273,9 @@ bool IotaClient::getTransactionsToApprove(int depth, String &trunk,
 
 bool IotaClient::attachToTangle(String trunk, String branch, int mwm,
 		std::vector<String> txs, std::vector<String> &txsWithPoW) {
-	DynamicJsonBuffer jsonReqBuf;
-	JsonObject &jsonReq = jsonReqBuf.createObject();
-	JsonArray& txArray = jsonReqBuf.createArray();
+	DynamicJsonBuffer jsonBuf;
+	JsonObject &jsonReq = jsonBuf.createObject();
+	JsonArray& txArray = jsonBuf.createArray();
 	int respStatus;
 
 	jsonReq["command"] = "attachToTangle";
@@ -291,8 +291,8 @@ bool IotaClient::attachToTangle(String trunk, String branch, int mwm,
 		DPRINTF("%s: response status code %d\n", __FUNCTION__, respStatus);
 		return false;
 	}
-	DynamicJsonBuffer jsonRespBuf;
-	JsonObject& jsonResp = jsonRespBuf.parseObject(_client.responseBody());
+	jsonBuf.clear();
+	JsonObject& jsonResp = jsonBuf.parseObject(_client.responseBody());
 	if (!jsonResp["trytes"].is<JsonArray>()) {
 		return false;
 	}
@@ -335,20 +335,20 @@ bool IotaClient::broadcastTransactions(std::vector<String> txs) {
 
 bool IotaClient::wereAddressesSpentFrom(std::vector<String> addrs,
 		std::vector<bool> &spent) {
-	DynamicJsonBuffer jsonReqBuf;
-	JsonObject &jsonReq = jsonReqBuf.createObject();
+	DynamicJsonBuffer jsonBuf;
+	JsonObject &jsonReq = jsonBuf.createObject();
 	int respStatus;
 
 	jsonReq["command"] = "wereAddressesSpentFrom";
-	JsonArray& addrArray = jsonReqBuf.createArray();
+	JsonArray& addrArray = jsonBuf.createArray();
 	for (auto it = addrs.cbegin(); it != addrs.cend(); it++) {
 		addrArray.add(*it);
 	}
 	jsonReq["addresses"] = addrArray;
 	respStatus = sendRequest(jsonReq);
+	jsonBuf.clear();
 	if (respStatus == 200) {
-		DynamicJsonBuffer jsonRespBuf;
-		JsonObject& jsonResp = jsonRespBuf.parseObject(_client.responseBody());
+		JsonObject& jsonResp = jsonBuf.parseObject(_client.responseBody());
 
 		if (jsonResp["states"].is<JsonArray>()) {
 			spent.clear();
