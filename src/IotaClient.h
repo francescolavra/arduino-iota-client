@@ -96,7 +96,7 @@ public:
              each address)
       @return true if balance request is successful, false otherwise
 	*/
-	bool getBalances(std::vector<String> addrs,
+	bool getBalances(std::vector<String> &addrs,
 			std::vector<uint64_t> &balances);
 
 	/** Find transactions that match a set of criteria
@@ -124,7 +124,7 @@ public:
              retrieved from the remote node
       @return true if transaction data request is successful, false otherwise
 	*/
-	bool getTransaction(String hash, struct IotaTx *tx);
+	bool getTransaction(String &hash, struct IotaTx *tx);
 
 	/** Retreive two transactions to be approved (tips) in the tangle
       @param depth  Random walk depth for the tip selection process
@@ -148,22 +148,22 @@ public:
              Work
       @return true if request is successful, false otherwise
 	*/
-	bool attachToTangle(String trunk, String branch, int mwm,
-			std::vector<String> txs, std::vector<String> &txsWithPoW);
+	bool attachToTangle(String &trunk, String &branch, int mwm,
+			std::vector<String> &txs, std::vector<String> &txsWithPoW);
 
 	/** Store transactions in the tangle
       @param txs  List of transactions (with Proof of Work) to be stored in the
              tangle; it can be retrieved via the attachToTangle() method
       @return true if request is successful, false otherwise
 	*/
-	bool storeTransactions(std::vector<String> txs);
+	bool storeTransactions(std::vector<String> &txs);
 
 	/** Broadcast transactions to neighbor nodes
       @param txs  List of transactions (with Proof of Work) to be broadcast to
              neighbors; it can be retrieved via the attachToTangle() method
       @return true if request is successful, false otherwise
 	*/
-	bool broadcastTransactions(std::vector<String> txs);
+	bool broadcastTransactions(std::vector<String> &txs);
 
 	/** Check if IOTA addresses have been spent from
       @param addrs  List of addresses for which the check must be executed
@@ -172,7 +172,7 @@ public:
              addresses have been spent from
       @return true if request is successful, false otherwise
 	*/
-	bool wereAddressesSpentFrom(std::vector<String> addrs,
+	bool wereAddressesSpentFrom(std::vector<String> &addrs,
 			std::vector<bool> &spent);
 
 private:

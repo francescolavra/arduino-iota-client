@@ -120,7 +120,7 @@ bool IotaClient::getNodeInfo(struct iotaNodeInfo *info) {
 	return true;
 }
 
-bool IotaClient::getBalances(std::vector<String> addrs,
+bool IotaClient::getBalances(std::vector<String> &addrs,
 		std::vector<uint64_t> &balances) {
 	DynamicJsonBuffer jsonBuf;
 	JsonObject &jsonReq = jsonBuf.createObject();
@@ -203,7 +203,7 @@ bool IotaClient::findTransactions(std::vector<String> &txs,
 	return true;
 }
 
-bool IotaClient::getTransaction(String hash, struct IotaTx *tx) {
+bool IotaClient::getTransaction(String &hash, struct IotaTx *tx) {
 	DynamicJsonBuffer jsonBuf;
 	JsonObject &jsonReq = jsonBuf.createObject();
 	JsonArray& hashArray = jsonBuf.createArray();
@@ -271,8 +271,8 @@ bool IotaClient::getTransactionsToApprove(int depth, String &trunk,
 	return true;
 }
 
-bool IotaClient::attachToTangle(String trunk, String branch, int mwm,
-		std::vector<String> txs, std::vector<String> &txsWithPoW) {
+bool IotaClient::attachToTangle(String &trunk, String &branch, int mwm,
+		std::vector<String> &txs, std::vector<String> &txsWithPoW) {
 	DynamicJsonBuffer jsonBuf;
 	JsonObject &jsonReq = jsonBuf.createObject();
 	JsonArray& txArray = jsonBuf.createArray();
@@ -307,7 +307,7 @@ bool IotaClient::attachToTangle(String trunk, String branch, int mwm,
 	return true;
 }
 
-bool IotaClient::storeTransactions(std::vector<String> txs) {
+bool IotaClient::storeTransactions(std::vector<String> &txs) {
 	DynamicJsonBuffer jsonReqBuf;
 	JsonObject &jsonReq = jsonReqBuf.createObject();
 	JsonArray& txArray = jsonReqBuf.createArray();
@@ -320,7 +320,7 @@ bool IotaClient::storeTransactions(std::vector<String> txs) {
 	return (sendRequest(jsonReq) == 200);
 }
 
-bool IotaClient::broadcastTransactions(std::vector<String> txs) {
+bool IotaClient::broadcastTransactions(std::vector<String> &txs) {
 	DynamicJsonBuffer jsonReqBuf;
 	JsonObject &jsonReq = jsonReqBuf.createObject();
 	JsonArray& txArray = jsonReqBuf.createArray();
@@ -333,7 +333,7 @@ bool IotaClient::broadcastTransactions(std::vector<String> txs) {
 	return (sendRequest(jsonReq) == 200);
 }
 
-bool IotaClient::wereAddressesSpentFrom(std::vector<String> addrs,
+bool IotaClient::wereAddressesSpentFrom(std::vector<String> &addrs,
 		std::vector<bool> &spent) {
 	DynamicJsonBuffer jsonBuf;
 	JsonObject &jsonReq = jsonBuf.createObject();
