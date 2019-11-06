@@ -272,7 +272,7 @@ bool IotaClient::getTransactionsToApprove(int depth, String &trunk,
 }
 
 bool IotaClient::attachToTangle(String &trunk, String &branch, int mwm,
-		std::vector<String> &txs, std::vector<String> &txsWithPoW) {
+		std::vector<String> &txs) {
 	DynamicJsonBuffer jsonBuf;
 	JsonObject &jsonReq = jsonBuf.createObject();
 	JsonArray& txArray = jsonBuf.createArray();
@@ -300,9 +300,9 @@ bool IotaClient::attachToTangle(String &trunk, String &branch, int mwm,
 	if (txWithPoWArray.size() != txs.size()) {
 		return false;
 	}
-	txsWithPoW.clear();
+	txs.clear();
 	for (int i = 0; i < txWithPoWArray.size(); i++) {
-		txsWithPoW.push_back(txWithPoWArray.get<String>(i));
+		txs.push_back(txWithPoWArray.get<String>(i));
 	}
 	return true;
 }

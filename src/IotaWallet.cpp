@@ -207,20 +207,19 @@ bool IotaWallet::attachAddress(String addr) {
 	std::vector<String> txs;
 	tx[NUM_TRANSACTION_TRYTES] = '\0';
 	txs.push_back(String(tx));
-	std::vector<String> txsWithPoW;
 	if (_PoWClient) {
 		DPRINTF("%s: using external PoW client\n", __FUNCTION__);
-		if (!_PoWClient->pow(trunk, branch, _mwm, txs, txsWithPoW)) {
+		if (!_PoWClient->pow(trunk, branch, _mwm, txs)) {
 			return false;
 		}
 	}
 	else {
-		if (!_iotaClient.attachToTangle(trunk, branch, _mwm, txs, txsWithPoW)) {
+		if (!_iotaClient.attachToTangle(trunk, branch, _mwm, txs)) {
 			return false;
 		}
 	}
-	return (_iotaClient.storeTransactions(txsWithPoW) &&
-			_iotaClient.broadcastTransactions(txsWithPoW));
+	return (_iotaClient.storeTransactions(txs) &&
+			_iotaClient.broadcastTransactions(txs));
 }
 
 bool IotaWallet::addrVerifyCksum(String addr) {
@@ -238,7 +237,6 @@ int IotaWallet::sendTransfer(uint64_t value, String recipient, String tag,
 	struct iotaWalletBundle *bundle;
 	String trunk, branch;
 	std::vector<String> txList;
-	std::vector<String> txsWithPoW;
 	int ret = IOTA_OK;
 
 	if (!addrVerifyCksum(recipient)) {
@@ -365,18 +363,17 @@ int IotaWallet::sendTransfer(uint64_t value, String recipient, String tag,
 	freeBundle(bundle);
 	if (_PoWClient) {
 		DPRINTF("%s: using external PoW client\n", __FUNCTION__);
-		if (!_PoWClient->pow(trunk, branch, _mwm, txList, txsWithPoW)) {
+		if (!_PoWClient->pow(trunk, branch, _mwm, txList)) {
 			return IOTA_ERR_POW;
 		}
 	}
 	else {
-		if (!_iotaClient.attachToTangle(trunk, branch, _mwm, txList,
-				txsWithPoW)) {
+		if (!_iotaClient.attachToTangle(trunk, branch, _mwm, txList)) {
 			DPRINTF("%s: couldn't attach to tangle\n", __FUNCTION__);
 			return IOTA_ERR_NETWORK;
 		}
 	}
-	if (!_iotaClient.storeTransactions(txsWithPoW)) {
+	if (!_iotaClient.storeTransactions(txList)) {
 		DPRINTF("%s: couldn't store transactions\n", __FUNCTION__);
 		return IOTA_ERR_NETWORK;
 	}
@@ -386,7 +383,7 @@ int IotaWallet::sendTransfer(uint64_t value, String recipient, String tag,
 			_lastSpentAddr = inputAddrs[inputAddrs.size() - 1].addrIdx;
 		}
 	}
-	return (_iotaClient.broadcastTransactions(txsWithPoW) ? IOTA_OK :
+	return (_iotaClient.broadcastTransactions(txList) ? IOTA_OK :
 			IOTA_ERR_NETWORK);
 exit:
 	freeBundle(bundle);

@@ -38,13 +38,12 @@ public:
              transactions to the tangle
       @param mwm  Minimum weight magnitude to be used when doing Proof of Work
       @param txs  List of transactions consituting the bundle on which Proof of
-             Work should be performed
-      @param txsWithPoW  List that is filled with transaction data with Proof of
-             Work
+             Work should be performed; these transactions are modified inside
+             this method by adding Proof of Work data
       @return true if Proof of Work has been done successfully, false otherwise
 	*/
 	virtual bool pow(String trunk, String branch, int mwm,
-			std::vector<String> txs, std::vector<String> &txsWithPoW) = 0;
+			std::vector<String> txs) = 0;
 };
 
 #endif

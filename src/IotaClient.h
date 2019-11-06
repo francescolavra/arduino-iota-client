@@ -143,13 +143,13 @@ public:
       @param branch  Hash of branch transaction to be approved when attaching
              transactions to the tangle; it can be retrieved via the
              getTransactionsToApprove() method
-      @param txs  List of transactions to attach to the tangle as a bundle
-      @param txsWithPoW  List that is filled with transaction data with Proof of
-             Work
+      @param txs  List of transactions to attach to the tangle as a bundle;
+             these transactions are modified inside this method by adding Proof
+             of Work data received from the remote node
       @return true if request is successful, false otherwise
 	*/
 	bool attachToTangle(String &trunk, String &branch, int mwm,
-			std::vector<String> &txs, std::vector<String> &txsWithPoW);
+			std::vector<String> &txs);
 
 	/** Store transactions in the tangle
       @param txs  List of transactions (with Proof of Work) to be stored in the
