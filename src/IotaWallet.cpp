@@ -55,6 +55,7 @@ struct iotaWalletBundle {
 	char bundleHash[NUM_HASH_TRYTES];
 	iota_wallet_tx_output_t outTx;
 	char *tx_chars;
+	BUNDLE_CTX bundle_ctx;
 };
 
 static char *iotaWalletTxPtr, *iotaWalletBundleHashPtr;
@@ -342,8 +343,8 @@ int IotaWallet::sendTransfer(uint64_t value, String recipient, String tag,
 			"transaction(s) and %s change transaction\n", __FUNCTION__,
 			bundle->descr.output_txs_length, bundle->descr.input_txs_length,
 			bundle->descr.change_tx ? "1" : "no");
-	iota_wallet_create_tx_bundle(iotaWalletBundleHashReceiver,
-			iotaWalletTxReceiver, &bundle->descr);
+	iota_wallet_create_tx_bundle_mem(iotaWalletBundleHashReceiver,
+			iotaWalletTxReceiver, &bundle->descr, &bundle->bundle_ctx, yield);
 
 	nullTerminatedTx = (char *) malloc(NUM_TRANSACTION_TRYTES + 1);
 	if (!nullTerminatedTx) {
