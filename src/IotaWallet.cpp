@@ -238,6 +238,7 @@ int IotaWallet::sendTransfer(uint64_t value, String recipient, String tag,
 	String trunk, branch;
 	std::vector<String> txList;
 	int ret = IOTA_OK;
+	char *nullTerminatedTx;
 
 	if (!addrVerifyCksum(recipient)) {
 		return IOTA_ERR_INV_ADDR;
@@ -344,7 +345,13 @@ int IotaWallet::sendTransfer(uint64_t value, String recipient, String tag,
 	iota_wallet_create_tx_bundle(iotaWalletBundleHashReceiver,
 			iotaWalletTxReceiver, &bundle->descr);
 
-	char nullTerminatedTx[NUM_TRANSACTION_TRYTES + 1];
+	nullTerminatedTx = (char *) malloc(NUM_TRANSACTION_TRYTES + 1);
+	if (!nullTerminatedTx) {
+		DPRINTF("%s: couldn't allocate memory for transaction string\n",
+				__FUNCTION__);
+		ret = IOTA_ERR_NO_MEM;
+		goto exit;
+	}
 	nullTerminatedTx[NUM_TRANSACTION_TRYTES] = '\0';
 	if (bundle->descr.change_tx != NULL) {
 		memcpy(nullTerminatedTx, &bundle->tx_chars[NUM_TRANSACTION_TRYTES *
@@ -360,6 +367,7 @@ int IotaWallet::sendTransfer(uint64_t value, String recipient, String tag,
 	}
 	memcpy(nullTerminatedTx, &bundle->tx_chars[0], NUM_TRANSACTION_TRYTES);
 	txList.push_back(String(nullTerminatedTx));
+	free(nullTerminatedTx);
 	freeBundle(bundle);
 	if (_PoWClient) {
 		DPRINTF("%s: using external PoW client\n", __FUNCTION__);
