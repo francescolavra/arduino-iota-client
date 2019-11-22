@@ -224,6 +224,9 @@ bool IotaClient::getTransaction(String &hash, struct IotaTx *tx) {
 		return false;
 	}
 	String txChars = txArray[0];
+	if (txChars.length() != NUM_TRANSACTION_TRYTES) {
+		return false;
+	}
 	tx->signatureMessage = txChars.substring(0, 2187);
 	tx->address = txChars.substring(2187, 2268);
 	chars_to_int64(txChars.c_str() + 2268, &tx->value, 27);
