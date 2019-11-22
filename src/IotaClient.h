@@ -180,12 +180,12 @@ public:
 			std::vector<bool> &spent);
 
 private:
-	int sendRequest(JsonObject &jsonReq);
-	JsonObject &getRespObj(DynamicJsonBuffer &jsonBuf);
+	int sendRequest(JsonDocument &jsonDoc);
+	JsonObject getRespObj(JsonDocument &jsonDoc);
 #ifdef ESP8266
 	class JsonHttpClient : public HTTPClient {
 	public:
-		int sendRequest(JsonObject &jsonReq);
+		int sendRequest(JsonDocument &jsonDoc);
 	} _client;
 #else
 	HttpClient _client;
