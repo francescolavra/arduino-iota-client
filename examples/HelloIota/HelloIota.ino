@@ -46,9 +46,9 @@ static void dumpNodeInfo() {
   Serial.println("JRE Version: " + nodeInfo.jreVersion);
   Serial.println(
     "Available Processors: " + String(nodeInfo.jreAvailableProcessors));
-  Serial.println("Free Memory: " + String(nodeInfo.jreFreeMemory));
-  Serial.println("Max Memory: " + String(nodeInfo.jreMaxMemory));
-  Serial.println("Total Memory: " + String(nodeInfo.jreTotalMemory));
+  Serial.printf("Free Memory: %llu\n", nodeInfo.jreFreeMemory);
+  Serial.printf("Max Memory: %llu\n", nodeInfo.jreMaxMemory);
+  Serial.printf("Total Memory: %llu\n", nodeInfo.jreTotalMemory);
   Serial.println("Latest Milestone: " + nodeInfo.latestMilestone);
   Serial.println(
     "Latest Milestone Index: " + String(nodeInfo.latestMilestoneIndex));

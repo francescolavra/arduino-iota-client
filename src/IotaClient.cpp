@@ -78,13 +78,13 @@ bool IotaClient::getNodeInfo(struct iotaNodeInfo *info) {
 	if (jsonResp["jreAvailableProcessors"].is<int>()) {
 		info->jreAvailableProcessors = jsonResp["jreAvailableProcessors"];
 	}
-	if (jsonResp["jreFreeMemory"].is<unsigned long>()) {
+	if (jsonResp["jreFreeMemory"].is<unsigned long long>()) {
 		info->jreFreeMemory = jsonResp["jreFreeMemory"];
 	}
-	if (jsonResp["jreMaxMemory"].is<unsigned long>()) {
+	if (jsonResp["jreMaxMemory"].is<unsigned long long>()) {
 		info->jreMaxMemory = jsonResp["jreMaxMemory"];
 	}
-	if (jsonResp["jreTotalMemory"].is<unsigned long>()) {
+	if (jsonResp["jreTotalMemory"].is<unsigned long long>()) {
 		info->jreTotalMemory = jsonResp["jreTotalMemory"];
 	}
 	if (jsonResp["latestMilestone"].is<char *>()) {

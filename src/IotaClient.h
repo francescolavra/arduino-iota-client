@@ -41,9 +41,9 @@ struct iotaNodeInfo {
 	String appVersion;
 	String jreVersion;
 	int jreAvailableProcessors;
-	unsigned long jreFreeMemory;
-	unsigned long jreMaxMemory;
-	unsigned long jreTotalMemory;
+	unsigned long long jreFreeMemory;
+	unsigned long long jreMaxMemory;
+	unsigned long long jreTotalMemory;
 	String latestMilestone;
 	int latestMilestoneIndex;
 	String latestSolidSubtangleMilestone;
