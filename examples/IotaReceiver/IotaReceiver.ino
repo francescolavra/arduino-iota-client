@@ -26,12 +26,20 @@
 #include <IotaWallet.h>
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
+#elif defined(ARDUINO_ARCH_STM32)
+#include <LwIP.h>
+#include <STM32Ethernet.h>
 #else
 #include <WiFi.h>
 #endif
 
-WiFiClient wifiClient;
-IotaClient iotaClient(wifiClient, "node05.iotatoken.nl", 14265);
+#if defined(ARDUINO_ARCH_STM32)
+EthernetClient networkClient;
+#else
+WiFiClient networkClient;
+#endif
+
+IotaClient iotaClient(networkClient, "node05.iotatoken.nl", 14265);
 IotaWallet iotaWallet(iotaClient);
 String receiveAddr;
 
@@ -41,12 +49,20 @@ void setup() {
 
   Serial.begin(115200);
 
+#if defined(ARDUINO_ARCH_STM32)
+  while (!Ethernet.begin()) {
+    printf(".");
+    delay(1000);
+  }
+  printf(" Ethernet connected\n");
+#else
   WiFi.begin("WIFISSID", "WIFIPASSWORD");
   do {
     printf(".");
     delay(1000);
   } while (WiFi.status() != WL_CONNECTED);
   printf(" Wi-Fi connected\n");
+#endif
 
   if (!iotaWallet.begin(seed)) {
     printf("Cannot initialize IOTA wallet\n");

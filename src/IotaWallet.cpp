@@ -38,6 +38,22 @@ extern "C"
 #include "iota-c-library/src/iota/conversion.h"
 #include "iota-c-library/src/iota/transfers.h"
 
+#if !defined(ESP32) && !defined(ESP8266)
+
+/* Needed for the time(time_t *) function to work. */
+int _gettimeofday(struct timeval *__p, void *__tz)
+{
+	if (__p) {
+		uint32_t now = millis();
+
+		__p->tv_sec = now / 1000;
+		__p->tv_usec = now - __p->tv_sec * 1000;
+	}
+	return 0;
+}
+
+#endif
+
 #ifdef __cplusplus
 }
 #endif

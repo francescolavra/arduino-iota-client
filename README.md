@@ -5,6 +5,7 @@ This is a IOTA library for Arduino; it can be used to connect to a user-supplied
 Supported platforms:
 * ESP32
 * ESP8266
+* STM32
 
 ## Dependencies
 
