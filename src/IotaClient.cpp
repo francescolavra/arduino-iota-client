@@ -366,7 +366,6 @@ int IotaClient::sendRequest(JsonDocument &jsonDoc) {
 	_client.sendHeader("Content-Length", measureJson(jsonDoc));
 	_client.beginBody();
 	serializeJson(jsonDoc, _client);
-	_client.endRequest();
 	return _client.responseStatusCode();
 #endif
 }
