@@ -359,13 +359,20 @@ int IotaClient::sendRequest(JsonDocument &jsonDoc) {
 #ifdef ESP8266
 	return _client.sendRequest(jsonDoc);
 #else
+	int contentLen = measureJson(jsonDoc), written;
+
 	_client.beginRequest();
 	_client.post("/");
 	_client.sendHeader("Content-Type", "application/json");
 	_client.sendHeader("X-IOTA-API-Version", "1");
-	_client.sendHeader("Content-Length", measureJson(jsonDoc));
+	_client.sendHeader("Content-Length", contentLen);
 	_client.beginBody();
-	serializeJson(jsonDoc, _client);
+	written = serializeJson(jsonDoc, _client);
+	if (written != contentLen) {
+		DPRINTF("%s: wrote %d of %d bytes\n", __FUNCTION__, written,
+				contentLen);
+		return -1;
+	}
 	return _client.responseStatusCode();
 #endif
 }
