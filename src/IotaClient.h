@@ -32,6 +32,7 @@
 #else
 #include <ArduinoHttpClient.h>
 #endif
+#include <vector>
 
 #define ARDUINOJSON_USE_LONG_LONG	1
 #include <ArduinoJson.h>

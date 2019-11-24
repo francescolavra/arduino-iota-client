@@ -27,6 +27,7 @@
 #define _IOTA_WALLET_H_
 
 #include <Arduino.h>
+#include <vector>
 
 #include "IotaClient.h"
 #include "PoWClient.h"
