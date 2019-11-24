@@ -31,7 +31,7 @@
 #endif
 
 WiFiClient wifiClient;
-IotaClient iotaClient(wifiClient, "116.202.20.134", 14265);
+IotaClient iotaClient(wifiClient, "node05.iotatoken.nl", 14265);
 IotaWallet iotaWallet(iotaClient);
 
 void setup() {

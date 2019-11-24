@@ -31,7 +31,7 @@
 #endif
 
 WiFiClient wifiClient;
-IotaClient iotaClient(wifiClient, "node2.iota.town", 14265);
+IotaClient iotaClient(wifiClient, "node05.iotatoken.nl", 14265);
 IotaWallet iotaWallet(iotaClient);
 String receiveAddr;
 
