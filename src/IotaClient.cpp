@@ -37,7 +37,7 @@ extern "C"
 #endif
 
 #ifdef IOTACLIENT_DEBUG
-#define DPRINTF	Serial.printf
+#define DPRINTF	printf
 #else
 #define DPRINTF(fmt, ...)	do {} while(0)
 #endif

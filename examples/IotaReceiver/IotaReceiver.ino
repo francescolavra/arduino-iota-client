@@ -40,24 +40,26 @@ void setup() {
     "DONOTUSETHISSEEDDONOTUSETHISSEEDDONOTUSETHISSEEDDONOTUSETHISSEEDDONOTUSETHISSEED9";
 
   Serial.begin(115200);
+
   WiFi.begin("WIFISSID", "WIFIPASSWORD");
   do {
-    Serial.print('.');
+    printf(".");
     delay(1000);
   } while (WiFi.status() != WL_CONNECTED);
-  Serial.println(" Wi-Fi connected");
+  printf(" Wi-Fi connected\n");
+
   if (!iotaWallet.begin(seed)) {
-    Serial.println("Cannot initialize IOTA wallet");
+    printf("Cannot initialize IOTA wallet\n");
     return;
   }
 
   if (iotaWallet.getReceiveAddress(receiveAddr)) {
-    Serial.printf("Please send IOTAs to this address: %s\n",
+    printf("Please send IOTAs to this address: %s\n",
       receiveAddr.c_str());
     receiveAddr.remove(81);	/* remove address checksum */
   }
   else {
-    Serial.println("Couldn't get receive address");
+    printf("Couldn't get receive address\n");
   }
 }
 
@@ -67,10 +69,10 @@ void loop() {
 
   addrs.push_back(receiveAddr);
   if (iotaClient.getBalances(addrs, balances)) {
-    Serial.printf("Got %llu IOTAs so far\n", balances[0]);
+    printf("Got %llu IOTAs so far\n", balances[0]);
   }
   else {
-    Serial.println("Cannot get balances");
+    printf("Cannot get balances\n");
   }
   delay(10000);
 }

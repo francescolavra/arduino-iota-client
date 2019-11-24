@@ -45,7 +45,7 @@ extern "C"
 #define IOTAWALLET_RANDOMWALK_DEPTH	10
 
 #ifdef IOTAWALLET_DEBUG
-#define DPRINTF	Serial.printf
+#define DPRINTF	printf
 #else
 #define DPRINTF(fmt, ...)	do {} while(0)
 #endif

@@ -39,27 +39,29 @@ void setup() {
     "DONOTUSETHISSEEDDONOTUSETHISSEEDDONOTUSETHISSEEDDONOTUSETHISSEEDDONOTUSETHISSEED9";
 
   Serial.begin(115200);
+
   WiFi.begin("WIFISSID", "WIFIPASSWORD");
   do {
-    Serial.print('.');
+    printf(".");
     delay(1000);
   } while (WiFi.status() != WL_CONNECTED);
-  Serial.println(" Wi-Fi connected");
+  printf(" Wi-Fi connected\n");
+
   if (!iotaWallet.begin(seed)) {
-    Serial.println("Cannot initialize IOTA wallet");
+    printf("Cannot initialize IOTA wallet\n");
     return;
   }
 
   String recipient =
     "DONOTUSETHISADDRESSDONOTUSETHISADDRESSDONOTUSETHISADDRESSDONOTUSETHISADDRESS99999UZ9WVXEDW";
   if (iotaWallet.addrVerifyCksum(recipient)) {
-    Serial.println("Sending IOTAs...");
+    printf("Sending IOTAs...\n");
     int ret = iotaWallet.sendTransfer(1, recipient, "MYTAG");
-    Serial.printf("Transfer result: %d (%s)\n", ret,
+    printf("Transfer result: %d (%s)\n", ret,
       (ret == 0) ? "OK": "error");
   }
   else {
-    Serial.println("Invalid recipient address");
+    printf("Invalid recipient address\n");
   }
 }
 
