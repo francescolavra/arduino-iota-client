@@ -27,6 +27,12 @@
 #define _IOTA_WALLET_H_
 
 #include <Arduino.h>
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 #include <vector>
 
 #include "IotaClient.h"

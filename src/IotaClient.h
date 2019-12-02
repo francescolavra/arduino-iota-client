@@ -32,6 +32,12 @@
 #else
 #include <ArduinoHttpClient.h>
 #endif
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
 #include <vector>
 
 #define ARDUINOJSON_USE_LONG_LONG	1
