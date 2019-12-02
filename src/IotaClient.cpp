@@ -356,25 +356,7 @@ bool IotaClient::wereAddressesSpentFrom(std::vector<String> &addrs,
 }
 
 int IotaClient::sendRequest(JsonDocument &jsonDoc) {
-#ifdef ESP8266
 	return _client.sendRequest(jsonDoc);
-#else
-	int contentLen = measureJson(jsonDoc), written;
-
-	_client.beginRequest();
-	_client.post("/");
-	_client.sendHeader("Content-Type", "application/json");
-	_client.sendHeader("X-IOTA-API-Version", "1");
-	_client.sendHeader("Content-Length", contentLen);
-	_client.beginBody();
-	written = serializeJson(jsonDoc, _client);
-	if (written != contentLen) {
-		DPRINTF("%s: wrote %d of %d bytes\n", __FUNCTION__, written,
-				contentLen);
-		return -1;
-	}
-	return _client.responseStatusCode();
-#endif
 }
 
 JsonObject IotaClient::getRespObj(JsonDocument &jsonDoc) {
@@ -391,13 +373,15 @@ JsonObject IotaClient::getRespObj(JsonDocument &jsonDoc) {
 	return jsonDoc.as<JsonObject>();
 }
 
+int IotaClient::JsonHttpClient::sendRequest(JsonDocument &jsonDoc) {
+	int contentLen = measureJson(jsonDoc);
+
 #ifdef ESP8266
 
-int IotaClient::JsonHttpClient::sendRequest(JsonDocument &jsonDoc) {
 	disconnect(true);	/* Clean up previous connection, if any. */
 	addHeader("Content-Type", "application/json");
 	addHeader("X-IOTA-API-Version", "1");
-	addHeader("Content-Length", String(measureJson(jsonDoc)));
+	addHeader("Content-Length", String(contentLen));
 	if (!connect()) {
 		return returnError(HTTPC_ERROR_CONNECTION_REFUSED);
 	}
@@ -438,6 +422,55 @@ int IotaClient::JsonHttpClient::sendRequest(JsonDocument &jsonDoc) {
 	print.flush();
 
 	return returnError(handleHeaderResponse());
-}
 
+#else
+
+	beginRequest();
+	post("/");
+	sendHeader("Content-Type", "application/json");
+	sendHeader("X-IOTA-API-Version", "1");
+	sendHeader("Content-Length", contentLen);
+	beginBody();
+
+	class BufferedNetworkPrint : public Print {
+	public:
+		BufferedNetworkPrint(size_t bufSize, Client &networkClient) :
+			_bufSize(bufSize), _networkClient(networkClient) {
+			_buf = (uint8_t *) malloc(bufSize);
+			_byteCount = 0;
+		}
+		~BufferedNetworkPrint() {
+			free(_buf);
+		}
+		size_t write(uint8_t b) {
+			_buf[_byteCount++] = b;
+			if (_byteCount == _bufSize) {
+				if (!_networkClient.write(_buf, _byteCount)) {
+					_byteCount--;
+					return 0;
+				}
+				_byteCount = 0;
+			}
+			return 1;
+		}
+		void flush() {
+			if (_byteCount != 0) {
+				_networkClient.write(_buf, _byteCount);
+				_byteCount = 0;
+			}
+		}
+	private:
+		size_t _bufSize, _byteCount;
+		uint8_t *_buf;
+		Client &_networkClient;
+	} print(1460, *iClient);
+	int written = serializeJson(jsonDoc, print);
+	if (written != contentLen) {
+		DPRINTF("%s: wrote %d of %d bytes\n", __FUNCTION__, written,
+				contentLen);
+		return -1;
+	}
+	print.flush();
+	return responseStatusCode();
 #endif
+}

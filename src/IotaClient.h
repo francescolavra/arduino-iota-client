@@ -185,12 +185,15 @@ private:
 	JsonObject getRespObj(JsonDocument &jsonDoc);
 #ifdef ESP8266
 	class JsonHttpClient : public HTTPClient {
+#else
+	class JsonHttpClient : public HttpClient {
+	public:
+		JsonHttpClient(Client &networkClient, const char *host, int port) :
+			HttpClient(networkClient, host, port) {}
+#endif
 	public:
 		int sendRequest(JsonDocument &jsonDoc);
 	} _client;
-#else
-	HttpClient _client;
-#endif
 };
 
 #endif
