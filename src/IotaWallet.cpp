@@ -70,11 +70,11 @@ struct iotaWalletBundle {
 	iota_wallet_bundle_description_t descr;
 	char bundleHash[NUM_HASH_TRYTES];
 	iota_wallet_tx_output_t outTx;
-	char *tx_chars;
 	BUNDLE_CTX bundle_ctx;
 };
 
-static char *iotaWalletTxPtr, *iotaWalletBundleHashPtr;
+static std::vector<String> *iotaWalletTxPtr;
+static char *iotaWalletBundleHashPtr;
 
 static int iotaWalletBundleHashReceiver(char *hash)
 {
@@ -90,9 +90,18 @@ static int iotaWalletBundleHashReceiver(char *hash)
 static int iotaWalletTxReceiver(iota_wallet_tx_object_t *tx_object)
 {
 	if (iotaWalletTxPtr && iotaWalletBundleHashPtr) {
-		iota_wallet_construct_raw_transaction_chars(iotaWalletTxPtr,
+		String &tx = *(iotaWalletTxPtr->insert(iotaWalletTxPtr->begin(),
+				String()));
+
+		if (tx.reserve(NUM_TRANSACTION_TRYTES) == 0) {
+			iotaWalletTxPtr->erase(iotaWalletTxPtr->begin());
+			return 0;
+		}
+		for (unsigned int i = 0; i < NUM_TRANSACTION_TRYTES; i++) {
+			tx += '9';
+		}
+		iota_wallet_construct_raw_transaction_chars((char *) tx.c_str(),
 				iotaWalletBundleHashPtr, tx_object);
-		iotaWalletTxPtr += NUM_TRANSACTION_TRYTES;
 		yield();
 		return 1;
 	}
@@ -205,7 +214,7 @@ bool IotaWallet::attachAddress(String addr) {
 	iota_wallet_tx_output_t outTx;
 	iota_wallet_bundle_description_t bundleDescr;
 	char bundleHash[NUM_HASH_TRYTES];
-	char tx[NUM_TRANSACTION_TRYTES + 1];
+	std::vector<String> txs;
 
 	if (!_iotaClient.getTransactionsToApprove(IOTAWALLET_RANDOMWALK_DEPTH,
 			trunk, branch)) {
@@ -219,12 +228,9 @@ bool IotaWallet::attachAddress(String addr) {
 	bundleDescr.output_txs_length = 1;
 	bundleDescr.timestamp = time(NULL);
 	iotaWalletBundleHashPtr = bundleHash;
-	iotaWalletTxPtr = tx;
+	iotaWalletTxPtr = &txs;
 	iota_wallet_create_tx_bundle(iotaWalletBundleHashReceiver,
 			iotaWalletTxReceiver, &bundleDescr);
-	std::vector<String> txs;
-	tx[NUM_TRANSACTION_TRYTES] = '\0';
-	txs.push_back(String(tx));
 	if (_PoWClient) {
 		DPRINTF("%s: using external PoW client\n", __FUNCTION__);
 		if (!_PoWClient->pow(trunk, branch, _mwm, txs)) {
@@ -256,7 +262,6 @@ int IotaWallet::sendTransfer(uint64_t value, String recipient, String tag,
 	String trunk, branch;
 	std::vector<String> txList;
 	int ret = IOTA_OK;
-	char *nullTerminatedTx;
 
 	if (!addrVerifyCksum(recipient)) {
 		return IOTA_ERR_INV_ADDR;
@@ -355,37 +360,13 @@ int IotaWallet::sendTransfer(uint64_t value, String recipient, String tag,
 	bundle->descr.timestamp = time(NULL);
 	iotaWalletBundleHashPtr = bundle->bundleHash;
 
-	iotaWalletTxPtr = bundle->tx_chars;
+	iotaWalletTxPtr = &txList;
 	DPRINTF("%s: creating bundle with %d output transaction(s), %d input "
 			"transaction(s) and %s change transaction\n", __FUNCTION__,
 			bundle->descr.output_txs_length, bundle->descr.input_txs_length,
 			bundle->descr.change_tx ? "1" : "no");
 	iota_wallet_create_tx_bundle_mem(iotaWalletBundleHashReceiver,
 			iotaWalletTxReceiver, &bundle->descr, &bundle->bundle_ctx, yield);
-
-	nullTerminatedTx = (char *) malloc(NUM_TRANSACTION_TRYTES + 1);
-	if (!nullTerminatedTx) {
-		DPRINTF("%s: couldn't allocate memory for transaction string\n",
-				__FUNCTION__);
-		ret = IOTA_ERR_NO_MEM;
-		goto exit;
-	}
-	nullTerminatedTx[NUM_TRANSACTION_TRYTES] = '\0';
-	if (bundle->descr.change_tx != NULL) {
-		memcpy(nullTerminatedTx, &bundle->tx_chars[NUM_TRANSACTION_TRYTES *
-				(bundle->descr.output_txs_length +
-				bundle->descr.input_txs_length * _security)],
-				NUM_TRANSACTION_TRYTES);
-		txList.push_back(String(nullTerminatedTx));
-	}
-	for (int i = bundle->descr.input_txs_length * _security - 1; i >= 0; i--) {
-		memcpy(nullTerminatedTx, &bundle->tx_chars[NUM_TRANSACTION_TRYTES *
-				(bundle->descr.output_txs_length + i)], NUM_TRANSACTION_TRYTES);
-		txList.push_back(String(nullTerminatedTx));
-	}
-	memcpy(nullTerminatedTx, &bundle->tx_chars[0], NUM_TRANSACTION_TRYTES);
-	txList.push_back(String(nullTerminatedTx));
-	free(nullTerminatedTx);
 	freeBundle(bundle);
 	if (_PoWClient) {
 		DPRINTF("%s: using external PoW client\n", __FUNCTION__);
@@ -584,25 +565,12 @@ void *IotaWallet::allocBundle(int numInputs, bool withChange) {
 		memset(bundle->descr.change_tx->tag, '9',
 				sizeof(bundle->descr.change_tx->tag));
 	}
-	bundle->tx_chars = (char *) malloc(NUM_TRANSACTION_TRYTES *
-			(bundle->descr.output_txs_length +
-			bundle->descr.input_txs_length * _security +
-			!!bundle->descr.change_tx));
-	if (!bundle->tx_chars) {
-		DPRINTF("%s: couldn't allocate memory for transaction characters\n",
-				__FUNCTION__);
-		free(bundle->descr.change_tx);
-		free(bundle->descr.input_txs);
-		free(bundle);
-		return NULL;
-	}
 	bundle->descr.security = _security;
 	bytes_to_chars(_seedBytes, bundle->descr.seed, sizeof(_seedBytes));
 	return bundle;
 }
 
 void IotaWallet::freeBundle(void *bundle) {
-	free(((struct iotaWalletBundle *)bundle)->tx_chars);
 	free(((struct iotaWalletBundle *)bundle)->descr.change_tx);
 	free(((struct iotaWalletBundle *)bundle)->descr.input_txs);
 	free(bundle);
