@@ -211,26 +211,26 @@ bool IotaWallet::getReceiveAddress(String &addr, bool withChecksum,
 
 bool IotaWallet::attachAddress(String addr) {
 	String trunk, branch;
-	iota_wallet_tx_output_t outTx;
-	iota_wallet_bundle_description_t bundleDescr;
-	char bundleHash[NUM_HASH_TRYTES];
+	struct iotaWalletBundle *bundle;
 	std::vector<String> txs;
 
 	if (!_iotaClient.getTransactionsToApprove(IOTAWALLET_RANDOMWALK_DEPTH,
 			trunk, branch)) {
 		return false;
 	}
-	memcpy(outTx.address, addr.c_str(), sizeof(outTx.address));
-	outTx.value = 0;
-	memset(outTx.tag, '9', sizeof(outTx.tag));
-	memset(&bundleDescr, 0, sizeof(&bundleDescr));
-	bundleDescr.output_txs = &outTx;
-	bundleDescr.output_txs_length = 1;
-	bundleDescr.timestamp = time(NULL);
-	iotaWalletBundleHashPtr = bundleHash;
+	bundle = (struct iotaWalletBundle *) allocBundle(0, false);
+	if (!bundle) {
+		DPRINTF("%s: couldn't allocate memory for bundle\n", __FUNCTION__);
+		return false;
+	}
+	memcpy(bundle->outTx.address, addr.c_str(), sizeof(bundle->outTx.address));
+	bundle->outTx.value = 0;
+	bundle->descr.timestamp = time(NULL);
+	iotaWalletBundleHashPtr = bundle->bundleHash;
 	iotaWalletTxPtr = &txs;
-	iota_wallet_create_tx_bundle(iotaWalletBundleHashReceiver,
-			iotaWalletTxReceiver, &bundleDescr);
+	iota_wallet_create_tx_bundle_mem(iotaWalletBundleHashReceiver,
+			iotaWalletTxReceiver, &bundle->descr, &bundle->bundle_ctx, yield);
+	freeBundle(bundle);
 	if (_PoWClient) {
 		DPRINTF("%s: using external PoW client\n", __FUNCTION__);
 		if (!_PoWClient->pow(trunk, branch, _mwm, txs)) {
