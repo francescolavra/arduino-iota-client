@@ -48,7 +48,7 @@
 #define IOTA_ERR_NO_MEM			-7
 
 struct iotaAddrWithBalance {
-	int addrIdx;
+	unsigned int addrIdx;
 	uint64_t balance;
 };
 
