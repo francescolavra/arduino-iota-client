@@ -51,19 +51,16 @@ static void dumpNodeInfo() {
   }
   printf("App Name: %s\n", nodeInfo.appName.c_str());
   printf("App Version: %s\n", nodeInfo.appVersion.c_str());
-  printf("JRE Version: %s\n", nodeInfo.jreVersion.c_str());
-  printf("Available Processors: %d\n", nodeInfo.jreAvailableProcessors);
-  printf("Free Memory: %llu\n", nodeInfo.jreFreeMemory);
-  printf("Max Memory: %llu\n", nodeInfo.jreMaxMemory);
-  printf("Total Memory: %llu\n", nodeInfo.jreTotalMemory);
   printf("Latest Milestone: %s\n", nodeInfo.latestMilestone.c_str());
   printf("Latest Milestone Index: %d\n", nodeInfo.latestMilestoneIndex);
   printf("Latest Solid Subtangle Milestone: %s\n",
     nodeInfo.latestSolidSubtangleMilestone.c_str());
   printf("Latest Solid Subtangle Milestone Index: %d\n",
     nodeInfo.latestSolidSubtangleMilestoneIndex);
+  printf("Milestone Start Index: %d\n", nodeInfo.milestoneStartIndex);
+  printf("Last Snapshotted Milestone Index: %d\n",
+    nodeInfo.lastSnapshottedMilestoneIndex);
   printf("Neighbors: %d\n", nodeInfo.neighbors);
-  printf("Packet Queue Size: %d\n", nodeInfo.packetsQueueSize);
   printf("Tips: %d\n", nodeInfo.tips);
   printf("Transactions to Request: %d\n", nodeInfo.transactionsToRequest);
   printf("Features:");

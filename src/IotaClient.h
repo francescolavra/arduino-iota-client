@@ -46,17 +46,13 @@
 struct iotaNodeInfo {
 	String appName;
 	String appVersion;
-	String jreVersion;
-	int jreAvailableProcessors;
-	unsigned long long jreFreeMemory;
-	unsigned long long jreMaxMemory;
-	unsigned long long jreTotalMemory;
 	String latestMilestone;
 	int latestMilestoneIndex;
 	String latestSolidSubtangleMilestone;
 	int latestSolidSubtangleMilestoneIndex;
+	int milestoneStartIndex;
+	int lastSnapshottedMilestoneIndex;
 	int neighbors;
-	int packetsQueueSize;
 	int tips;
 	int transactionsToRequest;
 	std::vector<String> features;

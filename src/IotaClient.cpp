@@ -72,21 +72,6 @@ bool IotaClient::getNodeInfo(struct iotaNodeInfo *info) {
 	if (jsonResp["appVersion"].is<char *>()) {
 		info->appVersion = jsonResp["appVersion"].as<String>();
 	}
-	if (jsonResp["jreVersion"].is<char *>()) {
-		info->jreVersion = jsonResp["jreVersion"].as<String>();
-	}
-	if (jsonResp["jreAvailableProcessors"].is<int>()) {
-		info->jreAvailableProcessors = jsonResp["jreAvailableProcessors"];
-	}
-	if (jsonResp["jreFreeMemory"].is<unsigned long long>()) {
-		info->jreFreeMemory = jsonResp["jreFreeMemory"];
-	}
-	if (jsonResp["jreMaxMemory"].is<unsigned long long>()) {
-		info->jreMaxMemory = jsonResp["jreMaxMemory"];
-	}
-	if (jsonResp["jreTotalMemory"].is<unsigned long long>()) {
-		info->jreTotalMemory = jsonResp["jreTotalMemory"];
-	}
 	if (jsonResp["latestMilestone"].is<char *>()) {
 		info->latestMilestone = jsonResp["latestMilestone"].as<String>();
 	}
@@ -101,11 +86,15 @@ bool IotaClient::getNodeInfo(struct iotaNodeInfo *info) {
 		info->latestSolidSubtangleMilestoneIndex =
 				jsonResp["latestSolidSubtangleMilestoneIndex"];
 	}
+	if (jsonResp["milestoneStartIndex"].is<int>()) {
+		info->milestoneStartIndex = jsonResp["milestoneStartIndex"];
+	}
+	if (jsonResp["lastSnapshottedMilestoneIndex"].is<int>()) {
+		info->lastSnapshottedMilestoneIndex =
+				jsonResp["lastSnapshottedMilestoneIndex"];
+	}
 	if (jsonResp["neighbors"].is<int>()) {
 		info->neighbors = jsonResp["neighbors"];
-	}
-	if (jsonResp["packetsQueueSize"].is<int>()) {
-		info->packetsQueueSize = jsonResp["packetsQueueSize"];
 	}
 	if (jsonResp["tips"].is<int>()) {
 		info->tips = jsonResp["tips"];
