@@ -415,7 +415,10 @@ int IotaClient::JsonHttpClient::sendRequest(JsonDocument &jsonDoc) {
 #else
 
 	beginRequest();
-	post("/");
+	if (post("/") != HTTP_SUCCESS) {
+		DPRINTF("%s: cannot send POST request\n", __FUNCTION__);
+		return -1;
+	}
 	sendHeader("Content-Type", "application/json");
 	sendHeader("X-IOTA-API-Version", "1");
 	sendHeader("Content-Length", contentLen);
